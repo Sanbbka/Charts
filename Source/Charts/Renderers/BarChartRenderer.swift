@@ -49,6 +49,72 @@ public class BarChartRenderer: ChartDataRendererBase
         }
     }
     
+    func add3D(rect: CGRect, context: CGContext, color2: UIColor) {
+        
+        let color = color2.colorWithAlphaComponent(0.7).CGColor
+        
+        let angle = M_PI/4
+        
+        let multY = CGFloat(sin(angle))
+        let multX = CGFloat(cos(angle))
+        
+        let mult: CGFloat = 0.41
+        
+        let lineWidth = rect.width * mult
+        let lineHeight = rect.height
+        
+        print(multX)
+        
+        let beginX = rect.origin.x
+        let beginY = rect.origin.y
+        
+        let secondDotX = beginX + lineWidth * multX
+        let secondDotY = beginY - lineWidth * multY
+        
+        let thirdDotX = secondDotX + lineWidth / mult
+        let thirdDotY = secondDotY
+        
+        let fourthDotX = thirdDotX
+        let fourthDotY = thirdDotY + lineHeight
+        
+        let fifthDotX = fourthDotX - lineWidth * multX
+        let fifthDotY = fourthDotY + lineWidth * multX
+        
+        let sixthDotX = beginX + lineWidth / mult
+        let sixthDotY = beginY
+        
+        CGContextMoveToPoint(context, beginX, beginY)
+        
+        CGContextAddLineToPoint(context, secondDotX, secondDotY)
+        CGContextAddLineToPoint(context, thirdDotX, thirdDotY)
+        CGContextAddLineToPoint(context, fourthDotX, fourthDotY)
+        CGContextAddLineToPoint(context, fifthDotX, fifthDotY)
+        CGContextAddLineToPoint(context, sixthDotX, sixthDotY)
+        
+        CGContextSetFillColorWithColor(context, color)
+        CGContextFillPath(context)
+        
+        let plusPath = UIBezierPath()
+        
+        //set the path's line width to the height of the stroke
+        plusPath.lineWidth = 1
+        
+        //move the initial point of the path
+        //to the start of the horizontal stroke
+        plusPath.moveToPoint(CGPoint(x: thirdDotX, y: thirdDotY))
+        
+        //add a point to the path at the end of the stroke
+        plusPath.addLineToPoint(CGPoint(
+            x:sixthDotX,
+            y:sixthDotY))
+        
+        //set the stroke color
+        color2.setStroke()
+        
+        //draw the stroke
+        plusPath.stroke()
+    }
+    
     public func drawDataSet(context context: CGContext, dataSet: IBarChartDataSet, index: Int)
     {
         guard let
@@ -76,6 +142,7 @@ public class BarChartRenderer: ChartDataRendererBase
         let borderWidth = dataSet.barBorderWidth
         let borderColor = dataSet.barBorderColor
         let drawBorder = borderWidth > 0.0
+        let effect3d = dataSet.barBool3d
         var y: Double
         
         // do the drawing
@@ -145,6 +212,10 @@ public class BarChartRenderer: ChartDataRendererBase
                     CGContextSetStrokeColorWithColor(context, borderColor.CGColor)
                     CGContextSetLineWidth(context, borderWidth)
                     CGContextStrokeRect(context, barRect)
+                }
+                
+                if effect3d {
+                    self.add3D(barRect, context: context, color2: dataSet.colorAt(j))
                 }
             }
             else
